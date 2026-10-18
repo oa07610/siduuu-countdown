@@ -252,21 +252,80 @@
   .pct { margin: 2px 0 0; font-weight: 600; color: var(--ink-soft); }
   .pct strong { color: var(--pink-deep); font-size: 1.15em; }
 
-  /* clocks */
-  .clocks { width: 100%; padding: 18px 16px; }
-  .clock-row {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
+  /* clocks: a live sky for each city */
+  .clocks { width: 100%; padding: 18px 16px 16px; }
+  .apart {
+    display: inline-flex;
     align-items: center;
-    gap: 10px;
-    margin-top: 6px;
+    gap: 6px;
+    margin: 0 0 12px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--ink-soft);
   }
-  .clock .who { font-weight: 600; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); }
-  .clock .time { font-weight: 700; font-size: clamp(1.5rem, 6vw, 2.1rem); font-variant-numeric: tabular-nums; color: var(--ink); }
-  .clock .day { font-size: 0.9rem; color: var(--ink-soft); }
-  .clock .sky { font-size: 1.4rem; display: block; margin-bottom: 2px; }
-  .apart { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--ink-soft); font-size: 0.8rem; font-weight: 600; }
-  .apart svg { width: 26px; height: 26px; fill: var(--pink); animation: heartbeat 1.6s ease-in-out infinite; }
+  .apart svg { width: 18px; height: 18px; fill: var(--pink); animation: heartbeat 1.6s ease-in-out infinite; }
+  .skies { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .sky {
+    --land: rgb(196, 160, 205);
+    --text: var(--ink);
+    --text-soft: var(--ink-soft);
+    position: relative;
+    height: 280px;
+    border-radius: 22px;
+    overflow: hidden;
+    background: #8cc4f5;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+    text-align: left;
+  }
+  .sky.dark { --text: #fff7fc; --text-soft: rgba(255, 236, 248, 0.8); }
+  .sky .stars { position: absolute; inset: 0 0 30% 0; }
+  .sky .stars i {
+    position: absolute;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 4px #fff;
+    animation: twinkle 3s ease-in-out infinite;
+  }
+  @keyframes twinkle { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+  .orb {
+    position: absolute;
+    width: 38px;
+    height: 38px;
+    margin: -19px 0 0 -19px;
+    border-radius: 50%;
+  }
+  .orb.sun {
+    background: radial-gradient(circle at 40% 40%, #fffbe0, #ffd56b 60%, #ffb347);
+    box-shadow: 0 0 24px 8px rgba(255, 210, 110, 0.55), 0 0 60px 20px rgba(255, 190, 120, 0.25);
+  }
+  .orb.moon {
+    background: transparent;
+    box-shadow: 9px -5px 0 0 #fdf3d0;
+    filter: drop-shadow(0 0 10px rgba(253, 243, 208, 0.7));
+  }
+  .clouds { position: absolute; inset: 0; }
+  .cloud {
+    position: absolute;
+    width: 46px;
+    height: 16px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.85);
+    animation: cloud 70s linear infinite;
+  }
+  .cloud::before, .cloud::after { content: ""; position: absolute; background: inherit; border-radius: 50%; }
+  .cloud::before { width: 22px; height: 22px; left: 8px; top: -11px; }
+  .cloud::after { width: 16px; height: 16px; left: 22px; top: -7px; }
+  .cloud.c1 { top: 50%; left: 20%; animation-delay: -20s; }
+  .cloud.c2 { top: 62%; left: 60%; transform: scale(0.7); animation-duration: 95s; animation-delay: -60s; }
+  @keyframes cloud { from { left: -60px; } to { left: 100%; } }
+  .skyline { position: absolute; left: 0; bottom: 0; width: 100%; height: 72px; }
+  .skyline .far { fill: var(--land); opacity: 0.45; }
+  .skyline .near { fill: var(--land); }
+  .sky-text { position: relative; z-index: 2; padding: 16px 16px 0; color: var(--text); }
+  .sky-text .who { font-weight: 700; font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-soft); }
+  .sky-text .time { font-weight: 700; font-size: clamp(1.8rem, 6vw, 2.4rem); font-variant-numeric: tabular-nums; line-height: 1.15; }
+  .sky-text .status { font-size: 0.95rem; font-weight: 600; }
+  .sky-text .sunline { margin-top: 2px; font-size: 0.8rem; font-weight: 500; color: var(--text-soft); }
 
   /* love note */
   .note {
@@ -312,12 +371,12 @@
 
   @media (max-width: 560px) {
     .countdown { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    .clock-row { grid-template-columns: 1fr; }
-    .apart { flex-direction: row; justify-content: center; }
+    .skies { grid-template-columns: 1fr; }
+    .sky { height: 270px; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    body, .blob, h1, .beat, .apart svg { animation: none !important; }
+    body, .blob, h1, .beat, .apart svg, .sky .stars i, .cloud { animation: none !important; }
     .num.bump { animation: none; }
     .note .quote { transition: none; }
   }
@@ -399,22 +458,70 @@
 
     <section class="clocks card">
       <h2>our clocks right now</h2>
-      <div class="clock-row">
-        <div class="clock">
-          <span class="sky" id="skyA"></span>
-          <div class="who">Owais · Sydney</div>
-          <div class="time" id="timeA">--:--</div>
-          <div class="day" id="dayA"></div>
+      <div class="apart">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#heart"/></svg>
+        <span id="apart"></span>
+      </div>
+      <div class="skies">
+        <div class="sky" id="skyA">
+          <div class="stars"></div>
+          <div class="orb sun"></div>
+          <div class="orb moon"></div>
+          <div class="clouds"><span class="cloud c1"></span><span class="cloud c2"></span></div>
+          <!-- Sydney: Opera House sails and the Harbour Bridge -->
+          <svg class="skyline" viewBox="0 0 400 72" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+            <path class="far" d="M0 52 Q 50 40 110 48 T 230 46 T 400 50 V72 H0 Z"/>
+            <g class="near">
+              <path d="M30 60 H162 V72 H30 Z"/>
+              <path d="M40 60 Q 46 36 70 28 Q 64 46 68 60 Z"/>
+              <path d="M66 60 Q 72 32 100 22 Q 92 44 96 60 Z"/>
+              <path d="M94 60 Q 102 40 124 34 Q 118 50 122 60 Z"/>
+              <path d="M120 60 Q 128 46 146 42 Q 140 54 144 60 Z"/>
+              <path d="M200 54 H390 V57 H200 Z"/>
+              <path d="M222 54 Q 300 8 378 54 L 371 54 Q 300 19 229 54 Z"/>
+              <path d="M212 38 H224 V57 H212 Z"/>
+              <path d="M376 38 H388 V57 H376 Z"/>
+              <path d="M0 64 H400 V72 H0 Z"/>
+            </g>
+          </svg>
+          <div class="sky-text">
+            <div class="who">Owais · Sydney</div>
+            <div class="time">--:--</div>
+            <div class="status"></div>
+            <div class="sunline"></div>
+          </div>
         </div>
-        <div class="apart">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#heart"/></svg>
-          <span id="apart"></span>
-        </div>
-        <div class="clock">
-          <span class="sky" id="skyB"></span>
-          <div class="who">Siduuu · Budapest</div>
-          <div class="time" id="timeB">--:--</div>
-          <div class="day" id="dayB"></div>
+        <div class="sky" id="skyB">
+          <div class="stars"></div>
+          <div class="orb sun"></div>
+          <div class="orb moon"></div>
+          <div class="clouds"><span class="cloud c1"></span><span class="cloud c2"></span></div>
+          <!-- Budapest: Buda hills and the Parliament -->
+          <svg class="skyline" viewBox="0 0 400 72" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+            <path class="far" d="M0 46 Q 60 28 130 42 Q 200 54 270 38 Q 340 26 400 42 V72 H0 Z"/>
+            <g class="near">
+              <path d="M70 60 V46 H330 V60 Z"/>
+              <path d="M70 46 L 80 40 H 320 L 330 46 Z"/>
+              <path d="M182 46 V40 H218 V46 Z"/>
+              <path d="M180 42 Q 180 20 200 17 Q 220 20 220 42 Z"/>
+              <path d="M198 17 L 200 2 L 202 17 Z"/>
+              <path d="M166 42 V26 L 170 14 L 174 26 V42 Z"/>
+              <path d="M226 42 V26 L 230 14 L 234 26 V42 Z"/>
+              <path d="M87 40 V32 L 90 24 L 93 32 V40 Z"/>
+              <path d="M117 40 V32 L 120 24 L 123 32 V40 Z"/>
+              <path d="M147 40 V32 L 150 24 L 153 32 V40 Z"/>
+              <path d="M247 40 V32 L 250 24 L 253 32 V40 Z"/>
+              <path d="M277 40 V32 L 280 24 L 283 32 V40 Z"/>
+              <path d="M307 40 V32 L 310 24 L 313 32 V40 Z"/>
+              <path d="M0 60 H400 V72 H0 Z"/>
+            </g>
+          </svg>
+          <div class="sky-text">
+            <div class="who">Siduuu · Budapest</div>
+            <div class="time">--:--</div>
+            <div class="status"></div>
+            <div class="sunline"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -471,16 +578,134 @@
     return Date.UTC(+p.year, +p.month - 1, +p.day) / 86400000;
   }
   const timeFmt = (tz) => new Intl.DateTimeFormat("en-AU", { timeZone: tz, hour: "numeric", minute: "2-digit", hour12: true });
-  const dayFmt = (tz) => new Intl.DateTimeFormat("en-AU", { timeZone: tz, weekday: "long", day: "numeric", month: "short" });
-  const fA = timeFmt(TZ_A), fB = timeFmt(TZ_B), dA = dayFmt(TZ_A), dB = dayFmt(TZ_B);
   const landFmt = new Intl.DateTimeFormat("en-AU", { timeZone: TZ_B, weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true });
 
-  function sky(tz, date) {
-    const h = +partsIn(tz, date).hour;
-    if (h >= 6 && h < 12) return "🌤️";
-    if (h >= 12 && h < 18) return "☀️";
-    if (h >= 18 && h < 21) return "🌇";
-    return "🌙";
+  // ---------- live skies ----------
+  const CITIES = [
+    { el: $("skyA"), tz: TZ_A, lat: -33.8688, lon: 151.2093 },
+    { el: $("skyB"), tz: TZ_B, lat: 47.4979, lon: 19.0402 }
+  ];
+  const RAD = Math.PI / 180;
+  const HORIZON = -0.833; // sunrise/sunset elevation, allowing for refraction
+  const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+
+  // Sun elevation in degrees (low-precision solar position, good to ~0.1°).
+  function sunElevation(lat, lon, ms) {
+    const d = ms / 86400000 + 2440587.5 - 2451545.0;
+    const g = (357.529 + 0.98560028 * d) * RAD;
+    const q = 280.459 + 0.98564736 * d;
+    const L = (q + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * RAD;
+    const e = (23.439 - 0.00000036 * d) * RAD;
+    const ra = Math.atan2(Math.cos(e) * Math.sin(L), Math.cos(L));
+    const dec = Math.asin(Math.sin(e) * Math.sin(L));
+    const gmst = (18.697374558 + 24.06570982441908 * d) % 24;
+    const ha = (gmst * 15 + lon) * RAD - ra;
+    const la = lat * RAD;
+    return Math.asin(Math.sin(la) * Math.sin(dec) + Math.cos(la) * Math.cos(dec) * Math.cos(ha)) / RAD;
+  }
+
+  // Nearest sunrises and sunsets either side of now, found by scanning ±26 h.
+  function sunEvents(c, now) {
+    const step = 3 * 60000;
+    const rises = [], sets = [];
+    let pt = now - 26 * 3600000, pe = sunElevation(c.lat, c.lon, pt);
+    for (let t = pt + step; t <= now + 26 * 3600000; t += step) {
+      const e = sunElevation(c.lat, c.lon, t);
+      if ((pe < HORIZON) !== (e < HORIZON)) {
+        (e > pe ? rises : sets).push(pt + (HORIZON - pe) / (e - pe) * step);
+      }
+      pt = t; pe = e;
+    }
+    const before = (a) => Math.max(...a.filter((x) => x <= now));
+    const after = (a) => Math.min(...a.filter((x) => x > now));
+    return { lastRise: before(rises), nextRise: after(rises), lastSet: before(sets), nextSet: after(sets) };
+  }
+
+  // Sky colours (top, horizon) keyed by sun elevation.
+  const SKY = [
+    [-18, "#191538", "#2f2560"],
+    [-10, "#2a2463", "#5c4a9c"],
+    [-4, "#4b4a9e", "#e58fb0"],
+    [2, "#7aa6e8", "#ffc1a1"],
+    [10, "#8cc4f5", "#ffe3cf"],
+    [25, "#9fd4ff", "#eaf6ff"]
+  ];
+  const rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const mix = (a, b, t) => "rgb(" + a.map((v, i) => Math.round(v + (b[i] - v) * t)).join(",") + ")";
+  function skyColors(elev) {
+    if (elev <= SKY[0][0]) return [SKY[0][1], SKY[0][2]];
+    for (let i = 1; i < SKY.length; i++) {
+      if (elev <= SKY[i][0]) {
+        const [e0, t0, b0] = SKY[i - 1], [e1, t1, b1] = SKY[i];
+        const t = (elev - e0) / (e1 - e0);
+        return [mix(rgb(t0), rgb(t1), t), mix(rgb(b0), rgb(b1), t)];
+      }
+    }
+    const last = SKY[SKY.length - 1];
+    return [last[1], last[2]];
+  }
+  const LAND_DAY = [196, 160, 205], LAND_NIGHT = [24, 18, 52];
+
+  function placeOrb(orb, t) {
+    orb.style.left = (10 + 80 * t) + "%";
+    orb.style.top = (78 - 32 * Math.sin(Math.PI * clamp(t, 0, 1))) + "%";
+  }
+  function period(h) {
+    if (h < 5) return "night";
+    if (h < 12) return "morning";
+    if (h < 17) return "afternoon";
+    if (h < 21) return "evening";
+    return "night";
+  }
+  function duration(ms) {
+    const m = Math.round(ms / 60000), h = Math.floor(m / 60);
+    return h ? h + "h " + pad(m % 60) + "m" : m + "m";
+  }
+
+  CITIES.forEach((c) => {
+    const stars = c.el.querySelector(".stars");
+    for (let i = 0; i < 28; i++) {
+      const s = document.createElement("i");
+      const size = 1 + Math.random() * 1.8;
+      s.style.cssText = `left:${Math.random() * 100}%;top:${Math.random() * 100}%;width:${size}px;height:${size}px;animation-delay:${-Math.random() * 3}s`;
+      stars.appendChild(s);
+    }
+    c.stars = stars;
+    c.sun = c.el.querySelector(".sun");
+    c.moon = c.el.querySelector(".moon");
+    c.clouds = c.el.querySelector(".clouds");
+    c.time = c.el.querySelector(".time");
+    c.status = c.el.querySelector(".status");
+    c.sunline = c.el.querySelector(".sunline");
+    c.timeFmt = timeFmt(c.tz);
+    c.weekday = new Intl.DateTimeFormat("en-AU", { timeZone: c.tz, weekday: "long" });
+  });
+
+  function renderSky(c, now) {
+    if (!c.ev || now - c.evAt > 60000) { c.ev = sunEvents(c, now); c.evAt = now; }
+    const ev = c.ev;
+    const elev = sunElevation(c.lat, c.lon, now);
+    const up = elev > HORIZON;
+    const [top, bottom] = skyColors(elev);
+    const night = clamp((2 - elev) / 8, 0, 1);
+
+    c.el.style.background = `linear-gradient(180deg, ${top}, ${bottom})`;
+    c.el.style.setProperty("--land", mix(LAND_DAY, LAND_NIGHT, night));
+    c.el.classList.toggle("dark", night > 0.5);
+    c.stars.style.opacity = clamp((-elev - 2) / 8, 0, 1);
+    c.clouds.style.opacity = clamp((elev + 2) / 10, 0, 1) * 0.9;
+
+    // Sun travels the arc from sunrise to sunset; the moon takes the night shift.
+    if (up) placeOrb(c.sun, (now - ev.lastRise) / (ev.nextSet - ev.lastRise));
+    else placeOrb(c.moon, (now - ev.lastSet) / (ev.nextRise - ev.lastSet));
+    c.sun.style.opacity = up ? 1 : 0;
+    c.moon.style.opacity = up ? 0 : clamp(-elev / 6, 0, 1);
+
+    const d = new Date(now);
+    c.time.textContent = c.timeFmt.format(d);
+    c.status.textContent = c.weekday.format(d) + " " + period(+partsIn(c.tz, d).hour);
+    const next = up ? ev.nextSet : ev.nextRise;
+    c.sunline.textContent = (up ? "sunset " : "sunrise ") + c.timeFmt.format(new Date(next)) + " · in " + duration(next - now);
   }
 
   // ---------- journey path ----------
@@ -557,14 +782,11 @@
       ? "<strong>landed!</strong> right where I belong"
       : "<strong>" + Math.min(99, Math.max(0, Math.floor(p * 100))) + "%</strong> of the way to you";
 
-    $("timeA").textContent = fA.format(nowDate);
-    $("timeB").textContent = fB.format(nowDate);
-    $("dayA").textContent = dA.format(nowDate);
-    $("dayB").textContent = dB.format(nowDate);
-    $("skyA").textContent = sky(TZ_A, nowDate);
-    $("skyB").textContent = sky(TZ_B, nowDate);
-    const gap = Math.abs(offsetMinutes(TZ_A, nowDate) - offsetMinutes(TZ_B, nowDate)) / 60;
-    $("apart").textContent = (Number.isInteger(gap) ? gap : gap.toFixed(1)) + " hours apart";
+    CITIES.forEach((c) => renderSky(c, now));
+    const diffMin = offsetMinutes(TZ_A, nowDate) - offsetMinutes(TZ_B, nowDate);
+    const gap = Math.abs(diffMin) / 60;
+    $("apart").textContent = (Number.isInteger(gap) ? gap : gap.toFixed(1)) + " hours apart · " +
+      (diffMin >= 0 ? "Sydney" : "Budapest") + " is ahead";
   }
 
   function loop() {
